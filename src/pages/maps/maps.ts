@@ -40,6 +40,44 @@ export class PopoverPage {
   }
 }
 
+@Component({
+  template:  `
+  <div>
+  <h4 align="center">Emergencia</h4>
+    <ion-input type="input" placeholder="Comentario" value={{coment}}></ion-input>
+  </div>
+  <button ion-button block color='danger' (click)="sendAlert()">Enviar</button>
+  ` 
+})
+export class PopoverPageEmergency {
+  
+  coment: string;
+  socketHost: string = 'http://34.195.35.232:8080/';
+  socket:any;
+  zone:any;
+
+  constructor(public viewCtrl: ViewController) {
+    this.socket=io.connect(this.socketHost);
+    this.zone= new NgZone({enableLongStackTrace: false});
+
+  }
+
+  
+
+  ngOnInit(){
+    
+  }
+
+  sendAlert(){
+    alert(this.coment);
+    this.socket.emit('AppEmergecyNotification',this.coment.toString());
+  }
+
+  close() {
+    this.viewCtrl.dismiss();
+  }
+}
+
 
 @Component({
   selector: 'maps-page',
@@ -492,7 +530,15 @@ export class MapsPage implements OnInit {
 
   }
 
-  setEmergency(){
+  setEmergency(myEvent){
+    
+    let popover = this.popoverCtrl.create(PopoverPageEmergency);
+    
+    popover.present({
+      
+      ev: myEvent
+    });
+    
     
   }
 

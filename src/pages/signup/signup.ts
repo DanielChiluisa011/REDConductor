@@ -152,7 +152,7 @@ export class SignupPage {
                   email: this.signup.get('email').value,
                   pass: this.signup.get('password').value
                 };
-                alert(this.storage.get('Position'));
+                // alert(this.storage.get('Position'));
                 this.socket.emit('AppNewUserRequest',NewUser);
                 let env = this;
                 let toast = env.toastCtrl.create({
@@ -198,7 +198,7 @@ export class SignupPage {
             });
         toast.present();
     }
-    alert(flag);
+    // alert(flag);
   }
 
   doFacebookSignup() {

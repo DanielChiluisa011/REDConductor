@@ -59,6 +59,7 @@ import { Storage } from '@ionic/storage';
 //MyPages
 
 import {PopoverPage} from '../pages/maps/maps';
+import {PopoverPageEmergency} from '../pages/maps/maps';
 
 const cloudSettings: CloudSettings = {
   'core': {
@@ -96,7 +97,7 @@ const cloudSettings: CloudSettings = {
     GoogleLoginPage,
     ContactCardPage,
     PopoverPage,
-
+    PopoverPageEmergency,
     PreloadImage,
     BackgroundImage,
     ShowHideContainer,
@@ -136,6 +137,7 @@ const cloudSettings: CloudSettings = {
     TermsOfServicePage,
     PrivacyPolicyPage,
     PopoverPage,
+    PopoverPageEmergency,
     MapsPage,
     FunctionalitiesPage,
     FacebookLoginPage,
