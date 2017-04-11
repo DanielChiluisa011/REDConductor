@@ -6,7 +6,7 @@
 
 <ion-content class="signup-content auth-content">
   <h2 class="auth-title">Crear una Cuenta</h2>
-  <form class="signup-form auth-form" [formGroup]="signup">
+  <form class="signup-form auth-form" [formGroup]="signup" (ngSubmit)="doSignup()">
 
     
       <ion-list radio-group formControlName="rdbciruc" >

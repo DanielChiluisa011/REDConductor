@@ -492,5 +492,13 @@ export class MapsPage implements OnInit {
 
   }
 
+  setEmergency(){
+    
+  }
+
+  setFullTruck(){
+
+  }
+
 
 }
