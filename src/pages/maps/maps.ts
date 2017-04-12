@@ -1,6 +1,8 @@
 import { Component, NgZone,ViewChild, OnInit } from '@angular/core';
 import { NavController, LoadingController, ToastController, PopoverController, NavParams, ViewController, Events } from 'ionic-angular';
 import { Keyboard, Geolocation,Geoposition} from 'ionic-native';
+import { Validators, FormGroup, FormControl, FormBuilder } from '@angular/forms';
+
 
 import { Observable } from 'rxjs/Observable';
 
@@ -12,6 +14,7 @@ import * as io from 'socket.io-client';
 import { Storage } from '@ionic/storage';
 import * as $ from 'jquery';
 
+//PopOver de Botón de Direcciones
 @Component({
   template:  `
   <div>
@@ -40,38 +43,65 @@ export class PopoverPage {
   }
 }
 
+
+//PopOver de Botón de emergencia
 @Component({
   template:  `
-  <div>
-  <h4 align="center">Emergencia</h4>
-    <ion-input type="input" placeholder="Comentario" value={{coment}}></ion-input>
-  </div>
-  <button ion-button block color='danger' (click)="sendAlert()">Enviar</button>
+  <form [formGroup]="emergency">
+    <div>
+      <h4 align="center">Emergencia</h4>
+      <div item-content style="width:100%; padding: 0px 15px 0px 15px; height: 60px;">
+        <ion-textarea placeholder="Comentario" #box rows="3"  formControlName="comment"></ion-textarea>  
+      </div>  
+    
+      <button ion-button block [disabled]="!emergency.valid" color='danger' (click)="sendAlert(box.value)" >Enviar</button>
+    </div>
+  </form>
   ` 
 })
 export class PopoverPageEmergency {
   
-  coment: string;
+  // coment: string;
   socketHost: string = 'http://34.195.35.232:8080/';
   socket:any;
   zone:any;
+  JourneyRoute: any;
 
-  constructor(public viewCtrl: ViewController) {
+  emergency: FormGroup;
+  
+
+  constructor(public viewCtrl: ViewController, public storage: Storage,) {
     this.socket=io.connect(this.socketHost);
     this.zone= new NgZone({enableLongStackTrace: false});
 
+
+    this.emergency = new FormGroup({
+      comment: new FormControl('',Validators.required),
+    });
+
+    this.storage.get('person').then((val)=>{
+      this.socket.emit('RequestJourneyRoute', val.PERSONID); //request al servidor con el parametro
+    })
+
+    this.socket.on('JourneyRouteData',(data)=>{
+      this.JourneyRoute=data[0];
+
+    })
   }
 
-  
 
   ngOnInit(){
     
   }
 
-  sendAlert(){
-    alert(this.coment);
-    this.socket.emit('AppEmergecyNotification',this.coment.toString());
+  sendAlert(coment: string){
+    let data={journeyid: this.JourneyRoute.JourneyId,  alerttype: "E", comment: coment, truckid: this.JourneyRoute.truckid ,date: new Date().toISOString()};
+    alert(data.journeyid+" "+data.alerttype+" "+data.comment+" "+data.truckid+" "+data.date);
+    this.socket.emit('AppEmergencyNotification',data);
+
   }
+
+  
 
   close() {
     this.viewCtrl.dismiss();
@@ -119,6 +149,7 @@ export class MapsPage implements OnInit {
     //   this.ShowJourney(aux)
     // })
     //this.ShowJourney(1);
+
     // Manejo socket
     this.socket=io.connect(this.socketHost);
     this.zone= new NgZone({enableLongStackTrace: false});
@@ -204,6 +235,7 @@ export class MapsPage implements OnInit {
       env.map_model.search_places_predictions = [];
     }
   }
+
   beginJourney(){
     if($('#btnBeginJourney').text()!="Pausar"){
       $('#btnBeginJourney').text("Pausar");
@@ -228,6 +260,7 @@ export class MapsPage implements OnInit {
         this.userMarker.marker.setIcon('./assets/images/maps/truck.png');
       }
   }
+
   setOrigin(location: google.maps.LatLng){
     let env = this;
 
@@ -381,7 +414,7 @@ export class MapsPage implements OnInit {
     let env=this;
     //let bound = new google.maps.LatLngBounds();
     
-    var ObjJourney;
+   
     var route;
     var recyclerId;
     var recycler;
@@ -391,7 +424,7 @@ export class MapsPage implements OnInit {
     var waypnts=[];
 
 
-
+    var ObjJourney;
     ObjJourney=this.lstJourneys[0];
     
     for (var j = 0; j < this.lstActiveOrders.length; j++) {
@@ -531,19 +564,26 @@ export class MapsPage implements OnInit {
   }
 
   setEmergency(myEvent){
-    
     let popover = this.popoverCtrl.create(PopoverPageEmergency);
-    
     popover.present({
-      
       ev: myEvent
     });
-    
     
   }
 
   setFullTruck(){
 
+
+
+    let data={journeyid: this.JourneyRoute.JourneyId,  alerttype: "CL", comment: "Camion Lleno", truckid: this.JourneyRoute.truckid ,date: new Date().toISOString()};
+    alert(data.journeyid+" "+data.alerttype+" "+data.comment+" "+data.truckid+" "+data.date);
+    this.socket.emit('AppFullNotification',data);
+
+    let toast = this.toastCtrl.create({
+                message: 'Su notificación ha sido enviada',
+                duration: 10000
+              });
+          toast.present();
   }
 
 
