@@ -70,7 +70,7 @@ export class PopoverPageEmergency {
   emergency: FormGroup;
   
 
-  constructor(public viewCtrl: ViewController, public storage: Storage,) {
+  constructor(public viewCtrl: ViewController, public storage: Storage,public toastCtrl: ToastController) {
     this.socket=io.connect(this.socketHost);
     this.zone= new NgZone({enableLongStackTrace: false});
 
@@ -99,6 +99,11 @@ export class PopoverPageEmergency {
     alert(data.journeyid+" "+data.alerttype+" "+data.comment+" "+data.truckid+" "+data.date);
     this.socket.emit('AppEmergencyNotification',data);
 
+    let toast = this.toastCtrl.create({
+                message: 'Su notificación ha sido enviada',
+                duration: 10000
+              });
+    toast.present();
   }
 
   
@@ -583,7 +588,7 @@ export class MapsPage implements OnInit {
                 message: 'Su notificación ha sido enviada',
                 duration: 10000
               });
-          toast.present();
+    toast.present();
   }
 
 
