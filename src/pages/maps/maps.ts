@@ -13,6 +13,8 @@ import { MapsModel, MapPlace } from './maps.model';
 import * as io from 'socket.io-client';
 import { Storage } from '@ionic/storage';
 import * as $ from 'jquery';
+import * as moment from 'moment';
+
 
 //PopOver de Botón de Direcciones
 @Component({
@@ -95,7 +97,7 @@ export class PopoverPageEmergency {
   }
 
   sendAlert(coment: string){
-    let data={journeyid: this.JourneyRoute.JourneyId,  alerttype: "E", comment: coment, truckid: this.JourneyRoute.truckid ,date: new Date().toISOString()};
+    let data={journeyid: this.JourneyRoute.JourneyId,  alerttype: "E", comment: coment, truckid: this.JourneyRoute.truckid ,date: moment().format('YYYY-MM-DD h:mm:ss')};
     alert(data.journeyid+" "+data.alerttype+" "+data.comment+" "+data.truckid+" "+data.date);
     this.socket.emit('AppEmergencyNotification',data);
 
@@ -578,9 +580,9 @@ export class MapsPage implements OnInit {
 
   setFullTruck(){
 
+    //var moment = require('moment');
 
-
-    let data={journeyid: this.JourneyRoute.JourneyId,  alerttype: "CL", comment: "Camion Lleno", truckid: this.JourneyRoute.truckid ,date: new Date().toISOString()};
+    let data={journeyid: this.JourneyRoute.JourneyId,  alerttype: "CL", comment: "Camion Lleno", truckid: this.JourneyRoute.truckid ,date: moment().format('YYYY-MM-DD h:mm:ss')};
     alert(data.journeyid+" "+data.alerttype+" "+data.comment+" "+data.truckid+" "+data.date);
     this.socket.emit('AppFullNotification',data);
 

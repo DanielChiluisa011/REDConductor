@@ -46,6 +46,8 @@ export class ListingPage {
   username: string;
   zone:any;
   lstJourneys: any = [];
+  lstJourneyOrders:any=[];
+  JourneyRoute: any;
   // Fin manejo socket
   
   
@@ -63,10 +65,23 @@ export class ListingPage {
     // Manejo socket
     this.socket=io.connect(this.socketHost);
     this.zone= new NgZone({enableLongStackTrace: false});
-    this.socket.emit('SelectJourneys','ex app');
-    this.socket.on('SelectJourneys',(data)=>{
-      this.lstJourneys = data;
-    });  
+
+    this.storage.get('person').then((val)=>{
+      this.socket.emit('RequestJourneyRoute', val.PERSONID); //request al servidor con el parametro
+      // alert("personid:"+val.PERSONID);
+    })
+
+    this.socket.on('JourneyRouteData',(data)=>{
+      this.JourneyRoute=data[0];
+      
+    })
+    // var JournId=this.JourneyRoute.JourneyId;
+    // alert("journeyID:"+JournId);
+    this.socket.emit('RequestJourneyOrders',1);
+    this.socket.on('ResponseJourneyOrders',(data)=>{
+      this.lstJourneyOrders=data;
+      // alert(data);
+    })  
     // Fin Manejo socket
   }
   

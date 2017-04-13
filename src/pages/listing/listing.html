@@ -27,23 +27,20 @@
    </ion-item>
 </ion-list>-->
 
-  <ion-card *ngFor="let journey of lstJourneys">
-
-    
-    <ion-card-header> 
-      <h1>Código de viaje: {{journey.JourneyId}}</h1>
+  <ion-card *ngFor='let elem of lstJourneyOrders'>
+    <ion-card-header > 
+      <h1>Número de Pedido: {{elem.ORDERID}}</h1>
     </ion-card-header>
     <ion-card-content>
       <div>
-      <p>Fecha: {{journey.JourneyDate}}</p>
-      <p>Estado: {{journey.JourneyState}}</p> 
-      <p>Estado: {{journey.JourneyState}}</p> 
+      <p>Fecha de Pedido: {{elem.ORDERDATE}}</p>
+      <p>Estado del Pedido: {{elem.ORDERSTATE}}</p>
+      <p>Tipo de Desecho: {{elem.WASTEONU}}</p> 
+      <p>Cantidad: <ion-input type="tel" value="{{elem.ORDERQUANTITY}}"></ion-input></p> 
+      
+      <button ion-button block color="primary"  >Guardar Cantidad</button>
       </div>
       <br>
-      <div align="center">
-      <button ion-button color="secondary" >Aceptar</button>
-      <button ion-button color="danger">Rechazar</button> 
-      </div>
     </ion-card-content>
     </ion-card>
 
