@@ -32,16 +32,19 @@
       <h1>Número de Pedido: {{elem.ORDERID}}</h1>
     </ion-card-header>
     <ion-card-content>
-      <div>
-      <p>Fecha de Pedido: {{elem.ORDERDATE}}</p>
-      <p>Estado del Pedido: {{elem.ORDERSTATE}}</p>
-      <p>Tipo de Desecho: {{elem.WASTEONU}}</p> 
-      <p>Cantidad: <ion-input type="tel" value="{{elem.ORDERQUANTITY}}"></ion-input></p> 
+      <form class="signup-form auth-form">
+        <div>
+        <p>Fecha de Pedido: {{elem.ORDERDATE}}</p>
+        <p>Estado del Pedido: {{elem.ORDERSTATE}}</p>
+        <p>Tipo de Desecho: {{elem.WASTEONU}}</p>
+        Cantidad: <ion-item><ion-input type="input" placeholder="Cantidad" value="{{elem.ORDERQUANTITY}}"></ion-input></ion-item>
+        
+        <button ion-button block color="primary"  >Guardar Cantidad</button>
+        </div>
       
-      <button ion-button block color="primary"  >Guardar Cantidad</button>
-      </div>
-      <br>
+      </form>
     </ion-card-content>
+    <br>
     </ion-card>
 
 
