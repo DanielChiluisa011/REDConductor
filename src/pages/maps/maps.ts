@@ -1,5 +1,5 @@
 import { Component, NgZone,ViewChild, OnInit } from '@angular/core';
-import { NavController, LoadingController, ToastController, PopoverController, NavParams, ViewController, Events } from 'ionic-angular';
+import { NavController, LoadingController, AlertController, ToastController, PopoverController, NavParams, ViewController, Events } from 'ionic-angular';
 import { Keyboard, Geolocation,Geoposition} from 'ionic-native';
 import { Validators, FormGroup, FormControl, FormBuilder } from '@angular/forms';
 
@@ -14,6 +14,7 @@ import * as io from 'socket.io-client';
 import { Storage } from '@ionic/storage';
 import * as $ from 'jquery';
 import * as moment from 'moment';
+
 
 
 //PopOver de Botón de Direcciones
@@ -106,6 +107,9 @@ export class PopoverPageEmergency {
                 duration: 10000
               });
     toast.present();
+
+
+    
   }
 
   
@@ -141,6 +145,7 @@ export class MapsPage implements OnInit {
   distributorMarker: any = [];
   watch: any;
   current_user: any;
+  
   // Fin manejo socket
   map_model: MapsModel = new MapsModel();
   constructor(
@@ -149,6 +154,7 @@ export class MapsPage implements OnInit {
     public toastCtrl: ToastController,
     public GoogleMapsService: GoogleMapsService,
     public storage: Storage,
+    public alertCtrl: AlertController,
     public popoverCtrl: PopoverController
   ) {
     this.geolocateMe();
@@ -415,13 +421,8 @@ export class MapsPage implements OnInit {
   }
 
   ShowJourney(location: google.maps.LatLng){
-
-
-
     let env=this;
     //let bound = new google.maps.LatLngBounds();
-    
-   
     var route;
     var recyclerId;
     var recycler;
@@ -429,7 +430,6 @@ export class MapsPage implements OnInit {
     var routeItemOrder=[];
     var Orders=[];
     var waypnts=[];
-
 
     var ObjJourney;
     ObjJourney=this.lstJourneys[0];
@@ -440,25 +440,19 @@ export class MapsPage implements OnInit {
       }	  
     }
 
-
     recyclerId=this.JourneyRoute.recyclingcenterid;
-    
     route=this.JourneyRoute.JourneyRoute.split(',');
     //alert(route.length);
 
     console.log(route.length);
     var distributorPosition;
     // var distributorPosition1 = new google.maps.LatLng(this.lstDistributors[0].CoordX, this.lstDistributors[0].CoordY);
-    
     //bound.extend(distributorPosition);
-    
-   
     // var limits = new google.maps.LatLngBounds(distributorPosition,location);
     // env.map_model.map.fitBounds(limits);
         env.map_model.map.setCenter(location);
         env.map_model.map.setZoom(11);
     // limits.extend(current_location);
-
       // for(var j=0;j<this.lstActiveOrders.length;j++){
       //   if(this.lstActiveOrders[j].JourneyId==this.lstJourneys[i].JourneyId){
       //     Orders.push(this.lstActiveOrders[j]);
@@ -469,14 +463,11 @@ export class MapsPage implements OnInit {
     //   this.distributorMarker[i] = env.map_model.addPlaceToMap(distributorPosition, '#00e9d5');
     // }
       
-
     for(var i = 0; i < this.lstDistributors.length; i++){
       for(var j=0;j<route.length;j++){
         if(this.lstDistributors[i].DistributorId==route[j]){
           routeItem.push(this.lstDistributors[i]);
-        }
-        
-        
+        }     
         // for (var k = 0; k < Orders.length; k++) {
  				// 	if(this.lstDistributors[i].DistributorId==Orders[k].DistributorId){
  				// 		routeItemOrder.push(Orders[k].OrderQuantity)
@@ -485,7 +476,6 @@ export class MapsPage implements OnInit {
       }
     }
 
-    
     for(var i=0;i<this.lstRecyclingCenters.length;i++){
       if(this.lstRecyclingCenters[i].RecyclingCenterId==recyclerId){
           recycler=this.lstRecyclingCenters[i];
@@ -519,12 +509,9 @@ export class MapsPage implements OnInit {
         data => {
           let directions = data[0],
               //distance = data[1].rows[0].elements[0].distance.text,
-              distance=data[0].routes[0].legs[0].distance.text,
-              
-              //distance2= data[1].rows[0].elements[0].distance.text,
-              
-              duration = data[0].routes[0].legs[0].duration.text;
-              
+              distance=data[0].routes[0].legs[0].distance.text,            
+              //distance2= data[1].rows[0].elements[0].distance.text,         
+              duration = data[0].routes[0].legs[0].duration.text;             
               for(var i=0;i<data[0].routes[0].legs[0].steps.length;i++){
                 this.steps.push(data[0].routes[0].legs[0].steps[i].instructions); 
               }
@@ -546,13 +533,63 @@ export class MapsPage implements OnInit {
           console.log('onCompleted');
         }
       );
-  
-      
-  
+    
 		//env.map_model.calculateAndDisplayRoute(location, recycler, waypnts);
-	
+  }
 
+  sendToRecycler(location: google.maps.LatLng){
 
+    let env=this;
+    //let bound = new google.maps.LatLngBounds();
+    var route;
+    var recyclerId;
+    var recycler;
+    var routeItem=[];
+    var routeItemOrder=[];
+    var Orders=[];
+    var waypnts=[];
+    recyclerId=this.JourneyRoute.recyclingcenterid;
+
+    for(var i=0;i<this.lstRecyclingCenters.length;i++){
+      if(this.lstRecyclingCenters[i].RecyclingCenterId==recyclerId){
+          recycler=this.lstRecyclingCenters[i];
+        }
+    }
+     var recyclerPosition=new google.maps.LatLng(recycler.CoordX, recycler.CoordY);
+      let recyclerContent='<h4>'+recycler.RecyclingCenterName+'</h4><p>'+recycler.RecyclingCenterAddress+'</p><p> Telf: '+recycler.RecyclingCenterPhone+'</p>';
+      var recyclerMarker = env.map_model.addRecyclingCenter(recyclerPosition, '#00e9d5', recyclerContent);
+
+     let directions_observable = env.GoogleMapsService.getDirectionsWaypoints(location, recyclerPosition, waypnts),
+        distance_observable = env.GoogleMapsService.getDistanceMatrix(location, recyclerPosition);
+
+     Observable.forkJoin(directions_observable, distance_observable).subscribe(
+        data => {
+          let directions = data[0],
+              //distance = data[1].rows[0].elements[0].distance.text,
+              distance=data[0].routes[0].legs[0].distance.text,            
+              //distance2= data[1].rows[0].elements[0].distance.text,         
+              duration = data[0].routes[0].legs[0].duration.text;             
+              for(var i=0;i<data[0].routes[0].legs[0].steps.length;i++){
+                this.steps.push(data[0].routes[0].legs[0].steps[i].instructions); 
+              }
+
+          env.map_model.directions_display.setDirections(directions);
+          
+          let toast = env.toastCtrl.create({
+                message: 'La distancia es '+distance+' y le tomará '+duration,
+                duration: 10000
+              });
+          toast.present();
+          console.log(this.steps);
+          //this.presentPopover(steps) ; 
+        },
+        e => {
+          console.log('onError: %s', e);
+        },
+        () => {
+          console.log('onCompleted');
+        }
+      );
   }
 
   // presentPopover() {
@@ -571,26 +608,99 @@ export class MapsPage implements OnInit {
   }
 
   setEmergency(myEvent){
-    let popover = this.popoverCtrl.create(PopoverPageEmergency);
-    popover.present({
-      ev: myEvent
-    });
     
+    let alert = this.alertCtrl.create({
+          title: 'CONFIRMACIÓN',
+          subTitle: '¿Está seguro de enviar un mensaje de alerta por emergencia? Esto cancelará sus ordenes no completadas.',
+            buttons: [
+              {
+                text: 'Cancelar',
+                handler: () => {
+                  
+                }
+              },
+              {
+                text: 'Confirmar',
+                handler: () => {
+                  let env = this,
+                  _loading = env.loadingCtrl.create();
+                  _loading.present();
+                  let popover = this.popoverCtrl.create(PopoverPageEmergency);
+                  popover.present({
+                    ev: myEvent
+                  });
+
+                  Geolocation.getCurrentPosition().then((position) => {
+                    let current_location = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+                    env.map_model.search_query = position.coords.latitude.toFixed(2) + ", " + position.coords.longitude.toFixed(2);
+                    this.sendToRecycler(current_location);
+                    env.map_model.using_geolocation = true;
+
+                    _loading.dismiss();
+                  }).catch((error) => {
+                    console.log('Error getting location', error);
+                    _loading.dismiss();
+                  });
+                }
+              }
+            ]
+    
+    });
+    alert.present();
+
+    
+ 
   }
 
   setFullTruck(){
 
-    //var moment = require('moment');
+    let alert = this.alertCtrl.create({
+          title: 'CONFIRMACIÓN',
+          subTitle: '¿Está seguro de enviar la alerta? Esto cancelará sus ordenes no completadas y lo enviará directamente al centro de reciclaje.',
+            buttons: [
+              {
+                text: 'Cancelar',
+                handler: () => {
+                  
+                }
+              },
+              {
+                text: 'Confirmar',
+                handler: () => {
+                 //var moment = require('moment');
+                  let env = this,
+                      _loading = env.loadingCtrl.create();
+                      _loading.present();
+                  let data={journeyid: this.JourneyRoute.JourneyId,  alerttype: "CL", comment: "Camion Lleno", truckid: this.JourneyRoute.truckid ,date: moment().format('YYYY-MM-DD h:mm:ss')};
+                  // alert(data.journeyid+" "+data.alerttype+" "+data.comment+" "+data.truckid+" "+data.date);
+                  this.socket.emit('AppFullNotification',data);
 
-    let data={journeyid: this.JourneyRoute.JourneyId,  alerttype: "CL", comment: "Camion Lleno", truckid: this.JourneyRoute.truckid ,date: moment().format('YYYY-MM-DD h:mm:ss')};
-    // alert(data.journeyid+" "+data.alerttype+" "+data.comment+" "+data.truckid+" "+data.date);
-    this.socket.emit('AppFullNotification',data);
+                  let toast = this.toastCtrl.create({
+                              message: 'Su notificación ha sido enviada',
+                              duration: 10000
+                            });
+                  toast.present();
 
-    let toast = this.toastCtrl.create({
-                message: 'Su notificación ha sido enviada',
-                duration: 10000
-              });
-    toast.present();
+                  Geolocation.getCurrentPosition().then((position) => {
+                    let current_location = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+                    env.map_model.search_query = position.coords.latitude.toFixed(2) + ", " + position.coords.longitude.toFixed(2);
+                    this.sendToRecycler(current_location);
+                    env.map_model.using_geolocation = true;
+
+                    _loading.dismiss();
+                  }).catch((error) => {
+                    console.log('Error getting location', error);
+                    _loading.dismiss();
+                  });
+                }
+              }
+            ]
+    
+    });
+    alert.present();
+
+    
+
   }
 
 
